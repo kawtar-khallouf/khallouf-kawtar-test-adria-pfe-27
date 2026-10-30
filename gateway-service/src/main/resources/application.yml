@@ -1,0 +1,50 @@
+server:
+  port: 8080
+spring:
+  application:
+    name: gateway-service
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8085/realms/bank}
+          jwk-set-uri: ${KEYCLOAK_JWK_SET_URI:http://localhost:8085/realms/bank/protocol/openid-connect/certs}
+  cloud:
+    gateway:
+      routes:
+      - id: account-rest
+        uri: lb://account-service
+        predicates:
+        - Path=/api/accounts/**
+      - id: transaction-rest
+        uri: lb://transaction-service
+        predicates:
+        - Path=/api/transactions/**,/api/transfers/**
+      - id: account-graphql
+        uri: lb://account-service
+        predicates:
+        - Path=/graphql/accounts
+        filters:
+        - SetPath=/graphql
+      - id: transaction-graphql
+        uri: lb://transaction-service
+        predicates:
+        - Path=/graphql/transactions
+        filters:
+        - SetPath=/graphql
+      - id: ai-agent
+        uri: lb://ai-agent-service
+        predicates:
+        - Path=/api/chat/**
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
+bank:
+  security:
+    enabled: ${BANK_SECURITY_ENABLED:true}
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
