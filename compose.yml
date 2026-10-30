@@ -1,0 +1,150 @@
+name: adria-bank
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.6.1
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+  kafka:
+    image: confluentinc/cp-kafka:7.6.1
+    depends_on: [zookeeper]
+    ports: ["127.0.0.1:9092:9092"]
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:29092,PLAINTEXT_HOST://0.0.0.0:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0
+    command: start-dev --import-realm
+    ports: ["127.0.0.1:8085:8080"]
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin-local-only
+    volumes:
+      - ./infra/keycloak:/opt/keycloak/data/import:ro
+  discovery-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        MODULE: discovery-service
+    environment:
+      EUREKA_URL: http://discovery-service:8761/eureka/
+      CONFIG_SERVER_URL: http://config-service:8888
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      KEYCLOAK_ISSUER_URI: http://localhost:8085/realms/bank
+      KEYCLOAK_JWK_SET_URI: http://keycloak:8080/realms/bank/protocol/openid-connect/certs
+      BANK_SECURITY_ENABLED: ${BANK_SECURITY_ENABLED:-true}
+      SPRING_PROFILES_ACTIVE: demo
+    ports: ["127.0.0.1:8761:8761"]
+  config-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        MODULE: config-service
+    environment:
+      EUREKA_URL: http://discovery-service:8761/eureka/
+      CONFIG_SERVER_URL: http://config-service:8888
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      KEYCLOAK_ISSUER_URI: http://localhost:8085/realms/bank
+      KEYCLOAK_JWK_SET_URI: http://keycloak:8080/realms/bank/protocol/openid-connect/certs
+      BANK_SECURITY_ENABLED: ${BANK_SECURITY_ENABLED:-true}
+      SPRING_PROFILES_ACTIVE: native
+    ports: ["127.0.0.1:8888:8888"]
+  gateway-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        MODULE: gateway-service
+    environment:
+      EUREKA_URL: http://discovery-service:8761/eureka/
+      CONFIG_SERVER_URL: http://config-service:8888
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      KEYCLOAK_ISSUER_URI: http://localhost:8085/realms/bank
+      KEYCLOAK_JWK_SET_URI: http://keycloak:8080/realms/bank/protocol/openid-connect/certs
+      BANK_SECURITY_ENABLED: ${BANK_SECURITY_ENABLED:-true}
+      SPRING_PROFILES_ACTIVE: demo
+    depends_on: [discovery-service, keycloak]
+    ports: ["127.0.0.1:8080:8080"]
+  account-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        MODULE: account-service
+    environment:
+      EUREKA_URL: http://discovery-service:8761/eureka/
+      CONFIG_SERVER_URL: http://config-service:8888
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      KEYCLOAK_ISSUER_URI: http://localhost:8085/realms/bank
+      KEYCLOAK_JWK_SET_URI: http://keycloak:8080/realms/bank/protocol/openid-connect/certs
+      BANK_SECURITY_ENABLED: ${BANK_SECURITY_ENABLED:-true}
+      SPRING_PROFILES_ACTIVE: demo
+      DB_URL: jdbc:h2:mem:accounts;DB_CLOSE_DELAY=-1
+    depends_on: [discovery-service, config-service]
+    ports: ["127.0.0.1:8081:8081"]
+  transaction-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        MODULE: transaction-service
+    environment:
+      EUREKA_URL: http://discovery-service:8761/eureka/
+      CONFIG_SERVER_URL: http://config-service:8888
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      KEYCLOAK_ISSUER_URI: http://localhost:8085/realms/bank
+      KEYCLOAK_JWK_SET_URI: http://keycloak:8080/realms/bank/protocol/openid-connect/certs
+      BANK_SECURITY_ENABLED: ${BANK_SECURITY_ENABLED:-true}
+      SPRING_PROFILES_ACTIVE: demo
+      BANK_SERVICE_CLIENT_ID: bank-svc
+      BANK_SERVICE_CLIENT_SECRET: ${BANK_SERVICE_CLIENT_SECRET:-development-only-bank-svc-secret}
+      SERVICE_TOKEN_URL: http://keycloak:8080/realms/bank/protocol/openid-connect/token
+      DB_URL: jdbc:h2:mem:transactions;DB_CLOSE_DELAY=-1
+    depends_on: [discovery-service, config-service, account-service, kafka]
+    ports: ["127.0.0.1:8082:8082"]
+  ai-agent-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        MODULE: ai-agent-service
+    environment:
+      EUREKA_URL: http://discovery-service:8761/eureka/
+      CONFIG_SERVER_URL: http://config-service:8888
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      KEYCLOAK_ISSUER_URI: http://localhost:8085/realms/bank
+      KEYCLOAK_JWK_SET_URI: http://keycloak:8080/realms/bank/protocol/openid-connect/certs
+      BANK_SECURITY_ENABLED: ${BANK_SECURITY_ENABLED:-true}
+      SPRING_PROFILES_ACTIVE: demo
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      ACCOUNT_MCP_URL: http://account-service:8081
+      TRANSACTION_MCP_URL: http://transaction-service:8082
+    depends_on: [account-service, transaction-service, keycloak]
+    ports: ["127.0.0.1:8083:8083"]
+  event-consumer-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        MODULE: event-consumer-service
+    environment:
+      EUREKA_URL: http://discovery-service:8761/eureka/
+      CONFIG_SERVER_URL: http://config-service:8888
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      KEYCLOAK_ISSUER_URI: http://localhost:8085/realms/bank
+      KEYCLOAK_JWK_SET_URI: http://keycloak:8080/realms/bank/protocol/openid-connect/certs
+      BANK_SECURITY_ENABLED: ${BANK_SECURITY_ENABLED:-true}
+      SPRING_PROFILES_ACTIVE: demo
+    depends_on: [kafka]
+  frontend:
+    build: ./frontend
+    depends_on: [gateway-service,keycloak]
+    ports: ["127.0.0.1:4200:80"]

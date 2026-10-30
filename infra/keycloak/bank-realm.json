@@ -1,0 +1,87 @@
+{
+  "realm": "bank",
+  "enabled": true,
+  "displayName": "ADRIA Banking Demo",
+  "roles": {
+    "realm": [
+      {
+        "name": "VIEWER",
+        "description": "Read bank accounts and transactions"
+      },
+      {
+        "name": "OPERATOR",
+        "description": "Bank operations"
+      }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "bank-ui",
+      "enabled": true,
+      "publicClient": true,
+      "directAccessGrantsEnabled": false,
+      "standardFlowEnabled": true,
+      "redirectUris": [
+        "http://localhost:4200/*"
+      ],
+      "webOrigins": [
+        "http://localhost:4200"
+      ],
+      "attributes": {
+        "pkce.code.challenge.method": "S256"
+      }
+    },
+    {
+      "clientId": "bank-svc",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "secret": "development-only-bank-svc-secret",
+      "serviceAccountsEnabled": true,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false
+    }
+  ],
+  "users": [
+    {
+      "username": "viewer",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "viewer-demo-123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "VIEWER"
+      ]
+    },
+    {
+      "username": "operator",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "operator-demo-123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "VIEWER",
+        "OPERATOR"
+      ]
+    },
+    {
+      "username": "service-account-bank-svc",
+      "enabled": true,
+      "serviceAccountClientId": "bank-svc",
+      "realmRoles": [
+        "VIEWER",
+        "OPERATOR"
+      ]
+    }
+  ]
+}
