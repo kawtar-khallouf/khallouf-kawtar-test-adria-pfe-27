@@ -1,0 +1,150 @@
+{
+  "dataset": "bank_transactions.csv (fichier fourni)",
+  "records": 5000,
+  "train_records": 3750,
+  "test_records": 1250,
+  "train_fraud": 193,
+  "test_fraud": 64,
+  "fraud_rate": 0.0514,
+  "missing_by_column": {
+    "transaction_id": 0,
+    "account_id": 0,
+    "amount": 0,
+    "hour": 0,
+    "country": 66,
+    "merchant_category": 84,
+    "transactions_last_24h": 0,
+    "average_amount_last_7d": 75,
+    "is_fraud": 0
+  },
+  "selected_model": "Régression logistique (pondérée)",
+  "selection_method": "Average Precision / CV stratifiée 3 plis, uniquement sur apprentissage",
+  "cv_comparison": [
+    {
+      "modele": "Régression logistique (pondérée)",
+      "cv_ap_moyenne": 0.18328158161872585,
+      "cv_ap_ecart_type": 0.02087959270852876,
+      "cv_plis": [
+        0.21280156321241392,
+        0.16912499992216873,
+        0.1679181817215949
+      ]
+    },
+    {
+      "modele": "Arbre de décision (pondéré)",
+      "cv_ap_moyenne": 0.0935407266590203,
+      "cv_ap_ecart_type": 0.0149902520076796,
+      "cv_plis": [
+        0.07526603211810147,
+        0.11198334864104503,
+        0.0933727992179144
+      ]
+    },
+    {
+      "modele": "Random Forest (pondérée)",
+      "cv_ap_moyenne": 0.11524826045674787,
+      "cv_ap_ecart_type": 0.014176602611757443,
+      "cv_plis": [
+        0.13529548688576037,
+        0.10543825153868461,
+        0.10501104294579863
+      ]
+    }
+  ],
+  "test_average_precision": 0.1884829371952114,
+  "test_roc_auc": 0.6977629637436763,
+  "baseline_always_non_fraud": {
+    "seuil": 0.5,
+    "accuracy": 0.9488,
+    "precision_fraude": 0.0,
+    "rappel_fraude": 0.0,
+    "f1_fraude": 0.0,
+    "f2_fraude": 0.0,
+    "matrice_confusion": [
+      [
+        1186,
+        0
+      ],
+      [
+        64,
+        0
+      ]
+    ],
+    "vrais_negatifs": 1186,
+    "faux_positifs": 0,
+    "faux_negatifs": 64,
+    "vrais_positifs": 0,
+    "nombre_alertes": 0
+  },
+  "test_threshold_fixed_0_50": {
+    "seuil": 0.5,
+    "accuracy": 0.7344,
+    "precision_fraude": 0.10355029585798817,
+    "rappel_fraude": 0.546875,
+    "f1_fraude": 0.17412935323383086,
+    "f2_fraude": 0.2946127946127946,
+    "matrice_confusion": [
+      [
+        883,
+        303
+      ],
+      [
+        29,
+        35
+      ]
+    ],
+    "vrais_negatifs": 883,
+    "faux_positifs": 303,
+    "faux_negatifs": 29,
+    "vrais_positifs": 35,
+    "nombre_alertes": 338
+  },
+  "oof_training_selected_threshold": 0.8,
+  "oof_training_threshold_metric": "F1 fraude maximum sur grille 0.05 à 0.95, sur OOF apprentissage uniquement",
+  "test_threshold_selected_on_training": {
+    "seuil": 0.8,
+    "accuracy": 0.9248,
+    "precision_fraude": 0.23214285714285715,
+    "rappel_fraude": 0.203125,
+    "f1_fraude": 0.21666666666666667,
+    "f2_fraude": 0.20833333333333334,
+    "matrice_confusion": [
+      [
+        1143,
+        43
+      ],
+      [
+        51,
+        13
+      ]
+    ],
+    "vrais_negatifs": 1143,
+    "faux_positifs": 43,
+    "faux_negatifs": 51,
+    "vrais_positifs": 13,
+    "nombre_alertes": 56
+  },
+  "fraud_precision": 0.10355029585798817,
+  "fraud_recall": 0.546875,
+  "fraud_f1": 0.17412935323383086,
+  "average_precision": 0.1884829371952114,
+  "confusion_matrix": [
+    [
+      883,
+      303
+    ],
+    [
+      29,
+      35
+    ]
+  ],
+  "threshold": 0.5,
+  "seed": 42,
+  "test_size": 0.25,
+  "limitations": [
+    "Pas de timestamp dans le CSV : aucune validation temporelle réalisable.",
+    "Modèle expérimental offline, pas de connexion aux microservices (conforme à l’énoncé).",
+    "Des comptes peuvent apparaître dans train et test ; les ID sont exclus du modèle.",
+    "Un seuil retenu sur apprentissage reste à valider selon coûts métier avant déploiement."
+  ]
+}

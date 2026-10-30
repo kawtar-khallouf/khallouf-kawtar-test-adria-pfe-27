@@ -1,0 +1,4 @@
+modele,cv_ap_moyenne,cv_ap_ecart_type
+Régression logistique (pondérée),0.18328158161872585,0.02087959270852876
+Arbre de décision (pondéré),0.0935407266590203,0.0149902520076796
+Random Forest (pondérée),0.11524826045674787,0.014176602611757443
