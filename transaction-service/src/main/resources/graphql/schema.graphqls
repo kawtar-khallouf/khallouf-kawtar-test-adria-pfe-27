@@ -1,0 +1,3 @@
+type BankTransaction { id: ID!, accountId: ID!, amount: Float!, currency: String!, merchantCategory: String, country: String, createdAt: String!, transactionType: String!, transferReference: ID }
+type Query { transactions: [BankTransaction!]!, transaction(id: ID!): BankTransaction }
+type Mutation { registerTransaction(accountId: ID!, amount: String!, currency: String!, merchantCategory: String!, country: String!): BankTransaction! }
