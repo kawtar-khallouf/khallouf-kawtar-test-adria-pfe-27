@@ -1,0 +1,33 @@
+digraph arch {
+ graph [bgcolor="#ffffff", pad=0.35, ranksep=0.66, nodesep=0.32, fontname="DejaVu Sans", label="ARCHITECTURE ADRIA - BANKING MICROSERVICES", labelloc=t, fontsize=19, fontcolor="#133a68"];
+ node [fontname="DejaVu Sans", shape=box, style="rounded,filled", fillcolor="#ecf4ff", color="#bfd7f2", fontcolor="#123f70", penwidth=1.2, margin="0.20,0.15"];
+ edge [fontname="DejaVu Sans", color="#7d95af", arrowsize=0.7, fontsize=10, fontcolor="#687f99"];
+ ui [label="ANGULAR 18\nDashboard / transactions / chat", fillcolor="#d9eafe"];
+ keycloak [label="KEYCLOAK\nOIDC / JWT / rôles", fillcolor="#ffe9ca", color="#f4c878"];
+ gateway [label="API GATEWAY : 8080\nSpring Cloud Gateway", fillcolor="#c4defc"];
+ eure [label="EUREKA : 8761\nDiscovery", fillcolor="#f4edff",color="#cfc5f5"];
+ conf [label="CONFIG SERVER : 8888\nmax-amount = 1000", fillcolor="#f4edff", color="#cfc5f5"];
+ acc [label="ACCOUNT SERVICE : 8081\nREST · GraphQL · MCP\nH2 Accounts", fillcolor="#d9f4ed", color="#aadccc"];
+ trx [label="TRANSACTION SERVICE : 8082\nREST · GraphQL · MCP\nOpenFeign + Resilience4j\nH2 Transactions + Outbox",fillcolor="#d9f4ed",color="#aadccc"];
+ ai [label="SPRING AI AGENT : 8083\nLLM + MCP Client", fillcolor="#deecfb"];
+ kafka [label="APACHE KAFKA\nbank.transactions.created", fillcolor="#fff0d9",color="#f3cd8f"];
+ audit [label="AUDIT CONSUMER : 8084\nJournalisation uniquement", fillcolor="#fff0d9", color="#f3cd8f"];
+ ml [label="PYTHON FRAUD MODEL\nOffline / CSV / scikit-learn", fillcolor="#f7f9fb", color="#d8e1eb"];
+ {rank=same;ui;keycloak}
+ {rank=same;gateway;eure;conf}
+ {rank=same;acc;trx;ai}
+ {rank=same;kafka;audit;ml}
+ ui -> gateway [label="HTTPS / JWT"];
+ ui -> keycloak [label="PKCE",style=dashed];
+ gateway -> acc [label="REST"];
+ gateway -> trx [label="REST"];
+ gateway -> ai [label="REST"];
+ trx -> acc [label="Feign / JWT",color="#1e75be",penwidth=2];
+ ai -> acc [label="MCP / SSE",style=dashed,color="#1e75be"];
+ ai -> trx [label="MCP / SSE",style=dashed,color="#1e75be"];
+ trx -> kafka [label="Outbox -> event", color="#d38b21",penwidth=2];
+ kafka -> audit [label="Consumer",color="#d38b21"];
+ gateway -> eure [style=dotted,arrowhead=none];
+ conf -> trx [style=dotted,label="config",constraint=false];
+ ml -> kafka [style=invis];
+}

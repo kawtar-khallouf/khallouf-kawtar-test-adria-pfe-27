@@ -1,0 +1,11 @@
+digraph transfer {
+ graph[bgcolor="white",rankdir=LR,pad=.3,ranksep=.55,fontname="DejaVu Sans",label="SÉQUENCE : VIREMENT INTERNE",labelloc=t,fontsize=17,fontcolor="#173c65"];
+ node[shape=box,style="rounded,filled",fontname="DejaVu Sans",color="#b4cbe7",fillcolor="#eaf2ff"];
+ edge[color="#557baf",fontname="DejaVu Sans",fontsize=10,arrowsize=.7];
+ a[label="1. POST /transfers\nTransactionService"];
+ b[label="2. Vérifier les 2 comptes\nFeign"];
+ c[label="3. AccountService\nVerrou 2 comptes + transfert atomique"];
+ d[label="4. TransactionService\n2 mouvements + outbox"];
+ e[label="5. Kafka\n2 événements"];
+ a->b->c->d->e;
+}

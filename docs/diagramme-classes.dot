@@ -1,0 +1,21 @@
+digraph classes {
+ graph [bgcolor="#ffffff", pad=0.3, ranksep=0.7, nodesep=0.46, fontname="DejaVu Sans", label="DIAGRAMME DE CLASSES - DOMAINE BANCAIRE", labelloc=t, fontsize=19, fontcolor="#133a68"];
+ node [shape=record,fontname="DejaVu Sans",style="filled",fillcolor="#f0f5ff",color="#a4bcd5",fontsize=10,margin="0.15,0.12"];
+ edge [fontname="DejaVu Sans",fontsize=10,color="#7d91a8"];
+ Account [label="{Account|id: UUID\lcustomerReference: String\lstatus: AccountStatus\lcurrency: String\lbalance: double\l|+getBalance()\l+setBalance()\l}",fillcolor="#dff3ee"];
+ AccountStatus [label="{AccountStatus|ACTIVE\lBLOCKED\l}",fillcolor="#eaf3fe"];
+ BalanceOperation [label="{BalanceOperation|id: UUID\loperationId: UUID (unique)\loperationType: String\l}",fillcolor="#dff3ee"];
+ BankTransaction [label="{BankTransaction|id: UUID\laccountId: UUID\lamount: BigDecimal\lcurrency: String\lmerchantCategory: String\lcountry: String\lcreatedAt: Instant\ltransactionType: String\ltransferReference: UUID?\l}",fillcolor="#e9f0ff"];
+ OutboxEvent [label="{OutboxEvent|id: UUID\laggregateId: UUID\lpayload: JSON String\lcreatedAt: Instant\lpublishedAt: Instant?\l}",fillcolor="#fff1df"];
+ AccountService [label="{AccountService|+create()\l+find()\l+list()\l+debit()\l+credit()\l+transfer()\l}"];
+ TransactionService [label="{TransactionService|+create()\l+transfer()\l+get()\l+list()\l+byAccount()\l}"];
+ AccountFeignClient [label="{AccountFeignClient|+get()\l+debit()\l+credit()\l+transfer()\l}"];
+ AccountStatus -> Account [label="1",arrowhead=vee];
+ Account -> BalanceOperation [style=dashed,label="opération idempotente"];
+ BankTransaction -> Account [style=dashed,label="accountId (UUID)"];
+ BankTransaction -> OutboxEvent [label="persist events",style=dashed];
+ AccountService -> Account [label="gère"];
+ TransactionService -> BankTransaction [label="gère"];
+ TransactionService -> AccountFeignClient [label="consomme"];
+ AccountFeignClient -> AccountService [style=dashed,label="REST"];
+}

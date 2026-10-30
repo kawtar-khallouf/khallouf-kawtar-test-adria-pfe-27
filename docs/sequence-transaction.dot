@@ -1,0 +1,12 @@
+digraph flow {
+ graph [bgcolor="white",rankdir=LR,pad=0.3,nodesep=.32,ranksep=.55,fontname="DejaVu Sans",label="SÉQUENCE : ENREGISTREMENT D'UNE TRANSACTION",labelloc=t,fontsize=17,fontcolor="#173c65"];
+ node[shape=box,style="rounded,filled",fillcolor="#eaf2ff",color="#b4cbe7",fontname="DejaVu Sans"];
+ edge[color="#557baf",fontname="DejaVu Sans",fontsize=10,arrowsize=.7];
+ a[label="1. Angular\nPOST /transactions"];
+ b[label="2. TransactionService\nPlafond + règles"];
+ c[label="3. AccountService\nLecture + débit atomique"];
+ d[label="4. H2 Transaction + Outbox\nMême transaction locale"];
+ e[label="5. Kafka\nclé = accountId"];
+ f[label="6. Audit Consumer\nLog, aucune mutation"];
+ a->b->c->d->e->f;
+}

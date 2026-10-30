@@ -1,0 +1,15 @@
+digraph FraudPipeline {
+ graph [rankdir=LR, bgcolor="white", pad="0.25", nodesep="0.38", ranksep="0.65", fontname="DejaVu Sans", label="Partie H — classification de fraude (hors microservices)", labelloc=t, fontsize=18, fontcolor="#223b62"];
+ node [shape=box, style="rounded,filled", fillcolor="#ecf4fd", color="#7ba5d6", fontname="DejaVu Sans", fontsize=10, penwidth=1.3, margin="0.12,0.1"];
+ edge [color="#6487aa", arrowsize=0.75, penwidth=1.3];
+ csv [label="bank_transactions.csv\n5 000 lignes — 257 fraudes"];
+ check [label="Audit qualité\nvaleurs manquantes\nexclusion ID", fillcolor="#f2f6fc"];
+ split [label="Split stratifié\ntrain 75 % / test 25 %", fillcolor="#e4f0ff"];
+ prep [label="Pipeline scikit-learn\nimputation + OneHot\n+ standardisation",fillcolor="#e7f3ed", color="#7db49b"];
+ cv [label="Validation croisée\n3 plis sur train\nLogReg, Arbre, RF",fillcolor="#e7f3ed", color="#7db49b"];
+ sel [label="Sélection AP moyenne\nseuil F1 sur train OOF",fillcolor="#e7f3ed", color="#7db49b"];
+ test [label="Évaluation test gelé\nPrécision / Rappel / F1\nAverage Precision",fillcolor="#ffefdd",color="#e3b780"];
+ out [label="Rapport + notebook\nMatrice confusion / PR\nGraphiques & conclusions",fillcolor="#ffefdd",color="#e3b780"];
+ csv -> check -> split -> prep -> cv -> sel -> test -> out;
+ // L'ensemble test reste à l'écart durant la comparaison.
+}

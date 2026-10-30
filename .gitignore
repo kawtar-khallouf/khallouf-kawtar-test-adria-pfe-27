@@ -1,0 +1,14 @@
+**/target/
+**/.idea/
+**/*.iml
+**/node_modules/
+frontend/dist/
+fraud/data/*.csv
+fraud/results/*.joblib
+fraud/results/predictions_test.csv
+.env
+*.log
+.DS_Store
+__pycache__/
+*.pyc
+fraud/.venv/
